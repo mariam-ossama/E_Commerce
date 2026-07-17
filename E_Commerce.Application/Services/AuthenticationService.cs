@@ -12,11 +12,37 @@ namespace E_Commerce.Application.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IIdentityService _identityService;
+        private readonly ITokenService _tokenService;
 
-        public AuthenticationService(IIdentityService identityService)
+        public AuthenticationService(IIdentityService identityService,
+                                     ITokenService tokenService)
         {
             _identityService = identityService;
+            _tokenService = tokenService;
         }
+
+        public async Task<Result<bool>> CheckEmailExistsAsync(string email, CancellationToken ct = default)
+            => await _identityService.EmailExistsAsync(email, ct);
+
+        public async Task<Result<UserDto>> GetCurrentUserAsync(string email, CancellationToken ct = default)
+        {
+            var userResult = await _identityService.FindUserByEmailAsync(email, ct);
+            var user = userResult.data;
+            var roleResult = await _identityService.GetUserRoles(email, ct);
+            var token = _tokenService.CreateToken(user.Id, user.Email, user.UserName, roleResult.data);
+            return new UserDto()
+            {
+                Email = email,
+                DisplayName = user.DisplayName,
+                Token = token
+            };
+        }
+
+        public async Task<Result<AddressDto>> GetUserAddressAsync(string email, CancellationToken ct = default)
+        {
+            return await _identityService.GetUserAddressByEmailAsync(email, ct);
+        }
+
         public async Task<Result<UserDto>> LoginAsync(LoginDto loginDto, CancellationToken ct = default)
         {
             // Get User by Email
@@ -30,12 +56,39 @@ namespace E_Commerce.Application.Services
             if (!passwordResult.data)
                 return Result<UserDto>.Fail(Error.Unauthorized("Invalid Email or Password"));
             // Return Result + UserDto
+            var user = userResult.data;
+            var rolesResult = await _identityService.GetUserRoles(user.Email);
+            var roles = rolesResult.data;
+            var token = _tokenService.CreateToken(user.Id, user.Email, user.UserName, roles);
             return new UserDto()
             {
                 Email = loginDto.Email,
                 DisplayName = userResult.data.DisplayName,
-                Token = "Token"
+                Token = token
             };
         }
+
+        public async Task<Result<UserDto>> RegisterAsync(RegisterDto registerDto, CancellationToken ct = default)
+        {
+            // Needs user manager to create user
+            var userResult = await _identityService.CreateUserAsync(registerDto,ct);
+            if(!userResult.IsSuccess)
+            {
+                return Result<UserDto>.Fail(userResult.Errors);
+            }
+            var user = userResult.data;
+            var rolesResult = await _identityService.GetUserRoles(user.Email);
+            var roles = rolesResult.data;
+            var token = _tokenService.CreateToken(user.Id, user.Email, user.UserName, roles);
+            return Result<UserDto>.Ok(new UserDto()
+            {
+                Email = user.Email,
+                DisplayName = user.DisplayName,
+                Token = token
+            });
+        }
+
+        public async Task<Result<AddressDto>> UpsertUserAddressAsync(string email, AddressDto addressDto, CancellationToken ct = default)
+            => await _identityService.UpdateOrInsertUserAddressAsync(email, addressDto, ct);
     }
 }
