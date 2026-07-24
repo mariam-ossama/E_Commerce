@@ -30,9 +30,6 @@ namespace E_Commerce.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(8,2)");
-
                     b.Property<string>("DeliveryTime")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -42,6 +39,9 @@ namespace E_Commerce.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(8,2)");
 
                     b.Property<string>("ShortName")
                         .IsRequired()

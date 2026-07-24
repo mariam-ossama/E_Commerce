@@ -36,6 +36,6 @@ namespace E_Commerce.Domain.Entities.Orders
         //{ 
         //    get { return SubTotal + DeliveryMethod.Cost; }
         //}
-        public decimal GetTotal() => SubTotal + (DeliveryMethod?.Cost ?? 0);
+        public decimal GetTotal() => SubTotal + (DeliveryMethod?.Price ?? 0);
     }
 }

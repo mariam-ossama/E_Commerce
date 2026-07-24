@@ -16,7 +16,7 @@ namespace E_Commerce.Infrastructure.Data.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id)
                 .ValueGeneratedOnAdd();
-            builder.Property(x => x.Cost)
+            builder.Property(x => x.Price)
                 .HasColumnType("decimal(8,2)");
             builder.Property(x => x.ShortName)
                 .HasColumnType("varchar")

@@ -20,7 +20,7 @@ namespace E_Commerce.Infrastructure.Data.Migrations
                     ShortName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     DeliveryTime = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Cost = table.Column<decimal>(type: "decimal(8,2)", nullable: false)
+                    Price = table.Column<decimal>(type: "decimal(8,2)", nullable: false)
                 },
                 constraints: table =>
                 {
